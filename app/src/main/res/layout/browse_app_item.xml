@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dip">
+
+    <ImageView
+        android:id="@+id/imgApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+    </ImageView>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_marginLeft="10dip"
+        android:layout_height="40dip">
+
+        <TextView
+            android:id="@+id/tv_App_Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dip"
+            android:text="Label"
+            android:textColor="#FFD700">
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_App_Size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_App_Label"
+            android:layout_alignLeft="@id/tv_App_Label"
+            android:text="adsfas"
+            android:textColor="#FFD700">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_App_version_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_App_Label"
+            android:layout_toRightOf="@+id/tv_App_Size"
+            android:text="asdfas "
+            />
+    </RelativeLayout>
+</LinearLayout>

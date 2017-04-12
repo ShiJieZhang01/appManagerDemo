@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AppManagerDemo2</string>
+
+    <string name="dialog_remove_ad_negative">CANCEL</string>
+    <string name="dialog_remove_ad_positive">OK</string>
+    <string name="dialog_remove_ad_restore_title">Choose the plan you paid before</string>
+    <string name="dialog_remove_ad_title">Please Choose</string>
+</resources>
