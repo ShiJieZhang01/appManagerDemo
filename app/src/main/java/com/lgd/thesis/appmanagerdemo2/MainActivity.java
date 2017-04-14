@@ -10,6 +10,7 @@ import android.content.pm.PackageStats;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -21,10 +22,23 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.jaredrummler.android.processes.AndroidProcesses;
+import com.jaredrummler.android.processes.models.AndroidAppProcess;
+import com.jaredrummler.android.processes.models.AndroidProcess;
+import com.jaredrummler.android.processes.models.Stat;
 import com.lgd.thesis.appmanagerdemo2.databinding.ActivityMainBinding;
+import com.lgd.thesis.appmanagerdemo2.largeFile.LargeFileInfo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import rx.Observable;
@@ -61,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onNext(List<AppInfo> appInfos) {
                 Log.d(TAG, "onNext: appinfo" + appInfos.size());
+
                     appinfos_listItem.clear();
                     appinfos_listItem.addAll(appInfos);
                     browseAppAdapter.notifyDataSetChanged();
@@ -71,8 +86,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mBinding.listviewApp.setAdapter(browseAppAdapter);
         mBinding.listviewApp.setOnItemClickListener(this);
 
+     
 
     }
+
+
 
     private Observable<List<AppInfo>> preloadInstallPackage() {
         Observable<List<AppInfo>> observable = Observable.create(new Observable.OnSubscribe<List<AppInfo>>() {
@@ -80,6 +98,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void call(Subscriber<? super List<AppInfo>> subscriber) {
                 List<AppInfo> appInfoList = queryAppInfo();
                 if (appInfoList != null && appInfoList.size() > 0) {
+
+                    Collections.sort(appInfoList, new Comparator<AppInfo>() {
+                        @Override
+                        public int compare(AppInfo o1, AppInfo o2) {
+                            return (int) (o2.getApp_size() - o1.getApp_size());
+                        }
+                    });
                     subscriber.onNext(appInfoList);
                     subscriber.onCompleted();
                 } else {
@@ -101,15 +126,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             for (final PackageInfo reInfo : listAppcations) {
                 if((reInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
                     final String appLabel = (String) reInfo.applicationInfo.loadLabel(pm); // 获得应用程序的Label
+                    Log.d(TAG, "queryAppInfo: "+appLabel+"-----"+reInfo.applicationInfo.sourceDir);
                     final Drawable icon = reInfo.applicationInfo.loadIcon(pm); // 获得应用程序图标
                     final String version_name = reInfo.versionName+"."+reInfo.versionCode;
+                    final long last_update_time = reInfo.lastUpdateTime;
                     try {
                         Method getPackageSizeInfo = getPackageManager().getClass().getMethod("getPackageSizeInfo", String.class,IPackageStatsObserver.class);
                         getPackageSizeInfo.invoke(getPackageManager(),reInfo.packageName, new IPackageStatsObserver.Stub(){
                             @Override
                             public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
                                 if(succeeded && pStats.codeSize > 0){
-                                    mlistAppInfo.add(new AppInfo(appLabel,icon,formateFileSize(pStats.codeSize),version_name,reInfo.packageName));
+                                    mlistAppInfo.add(new AppInfo(appLabel,icon,formateFileSize(pStats.codeSize),
+                                            version_name,reInfo.packageName,last_update_time,pStats.codeSize,reInfo.applicationInfo.sourceDir));
                                 }
                             }
                         });
@@ -149,7 +177,57 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //        startActivity(intent);
 
         //打开
-        Intent luanch_Intent = getPackageManager().getLaunchIntentForPackage(app_package_name);
-        startActivity(luanch_Intent);
+//        Intent luanch_Intent = getPackageManager().getLaunchIntentForPackage(app_package_name);
+//        startActivity(luanch_Intent);
+
+        Log.d(TAG, "onItemClick: Envirnment"+Environment.getExternalStorageDirectory());
+        //back up  安装
+//        String fileName = appinfos_listItem.get(position).getApp_source_dir();
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
+//        startActivity(intent);
+        
+        // 复制文件
+
+//        String old_source_path = appinfos_listItem.get(position).getApp_source_dir();
+//        String new_source_path = "/cleaner"+appinfos_listItem.get(position).getApp_source_dir();
+//
+//        File old_source_dir = new File(old_source_path);
+//        File new_source_dir = new File(new_source_path);
+//        FileInputStream fis = null;
+//        try {
+//            fis = new FileInputStream(old_source_path);
+//            FileOutputStream fos = new FileOutputStream(new_source_path);
+//            int len = 0;
+//            byte[] buf = new byte[1024];
+//            while ((len = fis.read(buf)) != -1) {
+//                fos.write(buf, 0, len);
+//            }
+//            fos.close();
+//            fis.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+        File file = null;
+        File file_dir = new File("cleaner");
+        file_dir.mkdir();
+        try {
+            file = new File("cleaner/a.word");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
+
+
+
+
+
+
 }
